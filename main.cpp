@@ -27,8 +27,6 @@
 #include <variant>
 #include <vector>
 
-
-
 int main(int argc, char *argv[]) {
     analyzer::cmd::ProgramOptions options;
     if (!options.Parse(argc, argv)){
@@ -54,55 +52,56 @@ int main(int argc, char *argv[]) {
         });
     });
 
-    analyzer::metric_accumulator::MetricsAccumulator accumulator;
-    using namespace analyzer::metric_accumulator::metric_accumulator_impl;
-    accumulator.RegisterAccumulator(CyclomaticComplexityMetric::kName, std::make_unique<SumAverageAccumulator>());
-    accumulator.RegisterAccumulator(NamingStyleMetric::kName, std::make_unique<CategoricalAccumulator>());
-    accumulator.RegisterAccumulator(CodeLinesCountMetric::kName, std::make_unique<SumAverageAccumulator>());
-    accumulator.RegisterAccumulator(CountParametersMetric::kName, std::make_unique<AverageAccumulator>());
+    //analyzer::metric_accumulator::MetricsAccumulator accumulator;
+    //using namespace analyzer::metric_accumulator::metric_accumulator_impl;
+    //accumulator.RegisterAccumulator(CyclomaticComplexityMetric::kName, std::make_unique<SumAverageAccumulator>());
+    //accumulator.RegisterAccumulator(NamingStyleMetric::kName, std::make_unique<CategoricalAccumulator>());
+    //accumulator.RegisterAccumulator(CodeLinesCountMetric::kName, std::make_unique<SumAverageAccumulator>());
+    //accumulator.RegisterAccumulator(CountParametersMetric::kName, std::make_unique<AverageAccumulator>());
 
-    auto print_accumulated_analysis = [](const auto &accumulator) {
-        auto &cc_acc_metric =
-            accumulator.template GetFinalizedAccumulator<SumAverageAccumulator>(CyclomaticComplexityMetric::kName);
-        std::println("    Sum Cyclomatic Complexity: {}", cc_acc_metric.Get().sum);
-        std::println("    Average Cyclomatic Complexity per function: {}", cc_acc_metric.Get().average);
-        auto &naming_acc_metric =
-            accumulator.template GetFinalizedAccumulator<CategoricalAccumulator>(NamingStyleMetric::kName);
-        std::ranges::for_each(naming_acc_metric.Get(), [](const auto &elem) {
-            std::println("    Naming style '{}' is occured {} times", elem.first, elem.second);
-        });
-        auto &cl_acc_metric =
-            accumulator.template GetFinalizedAccumulator<SumAverageAccumulator>(CodeLinesCountMetric::kName);
-        std::println("    Sum Code lines count: {}", cl_acc_metric.Get().sum);
-        std::println("    Average Code lines count per function: {}", cl_acc_metric.Get().average);
-        auto &cp_acc_metric =
-            accumulator.template GetFinalizedAccumulator<AverageAccumulator>(CountParametersMetric::kName);
-        std::println("    Average Parameters count per function: {}", cp_acc_metric.Get());
-    };
+    //auto print_accumulated_analysis = [](const auto &accumulator) {
+    //    auto &cc_acc_metric =
+    //        accumulator.template GetFinalizedAccumulator<SumAverageAccumulator>(CyclomaticComplexityMetric::kName);
+    //    std::println("    Sum Cyclomatic Complexity: {}", cc_acc_metric.Get().sum);
+    //    std::println("    Average Cyclomatic Complexity per function: {}", cc_acc_metric.Get().average);
+    //    auto &naming_acc_metric =
+    //        accumulator.template GetFinalizedAccumulator<CategoricalAccumulator>(NamingStyleMetric::kName);
+    //    std::ranges::for_each(naming_acc_metric.Get(), [](const auto &elem) {
+    //        std::println("    Naming style '{}' is occured {} times", elem.first, elem.second);
+    //    });
+    //    auto &cl_acc_metric =
+    //        accumulator.template GetFinalizedAccumulator<SumAverageAccumulator>(CodeLinesCountMetric::kName);
+    //    std::println("    Sum Code lines count: {}", cl_acc_metric.Get().sum);
+    //    std::println("    Average Code lines count per function: {}", cl_acc_metric.Get().average);
+    //    auto &cp_acc_metric =
+    //        accumulator.template GetFinalizedAccumulator<AverageAccumulator>(CountParametersMetric::kName);
+    //    std::println("    Average Parameters count per function: {}", cp_acc_metric.Get());
+    //};
 
-    auto analysis_by_files = analyzer::SplitByFiles(analysis);
+    //auto analysis_by_files = analyzer::SplitByFiles(analysis);
 
-    std::ranges::for_each(analysis_by_files, [&accumulator, &print_accumulated_analysis](const auto &analysis) {
-        analyzer::AccumulateFunctionAnalysis(analysis, accumulator);
-        std::println();
-        //std::println("Accumulated Analysis for file {}:", analysis.front().first.filename);
-        print_accumulated_analysis(accumulator);
-        accumulator.ResetAccumulators();
-    });
+    //std::ranges::for_each(analysis_by_files, [&accumulator, &print_accumulated_analysis](const auto &file_analysis) {
+    //    analyzer::AccumulateFunctionAnalysis(file_analysis, accumulator);
+    //    std::println();
+    //    //std::println("Accumulated Analysis for file {}:", analysis.front().first.filename);
+    //    print_accumulated_analysis(accumulator);
+    //    accumulator.ResetAccumulators();
+    //});
 
-    auto analysis_by_classes = analyzer::SplitByClasses(analysis);
+    //auto analysis_by_classes = analyzer::SplitByClasses(analysis);
 
-    std::ranges::for_each(analysis_by_classes, [&accumulator, &print_accumulated_analysis](const auto &analysis) {
-        analyzer::AccumulateFunctionAnalysis(analysis, accumulator);
-        std::println();
-        //std::println("Accumulated Analysis for сlass {}:", analysis.front().first.class_name.value());
-        print_accumulated_analysis(accumulator);
-        accumulator.ResetAccumulators();
-    });
+    //std::ranges::for_each(analysis_by_classes, [&accumulator, &print_accumulated_analysis](const auto &analysis) {
+    //    analyzer::AccumulateFunctionAnalysis(analysis, accumulator);
+    //    std::println();
+    //    //std::println("Accumulated Analysis for сlass {}:", analysis.front().first.class_name.value());
+    //    print_accumulated_analysis(accumulator);
+    //    accumulator.ResetAccumulators();
+    //});
 
-    analyzer::AccumulateFunctionAnalysis(analysis, accumulator);
-    std::println();
-    std::println("Accumulated Analysis for All Functions:");
-    print_accumulated_analysis(accumulator);
+    //analyzer::AccumulateFunctionAnalysis(analysis, accumulator);
+    //std::println();
+    //std::println("Accumulated Analysis for All Functions:");
+    //print_accumulated_analysis(accumulator);
+    
     return 0;
 }

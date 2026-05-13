@@ -38,9 +38,10 @@ namespace rs = std::ranges;
  * 5. Для каждой функции вычисляет набор метрик через переданный `metric_extractor`.
  * 6. Возвращает вектор пар: (функция, результаты её метрик).
  */
+using FunctionsAnalyseResult = std::vector<std::pair<analyzer::function::Function, analyzer::metric::MetricResults>>;
 auto AnalyseFunctions(const std::vector<std::string> &files,
                       const analyzer::metric::MetricExtractor &metric_extractor) {
-    std::vector<std::pair<analyzer::function::Function, analyzer::metric::MetricResults>> result;
+    FunctionsAnalyseResult result;
     result.reserve(files.size());
     rs::for_each(files, [&](const auto &file_path) {
         analyzer::file::File file{file_path};
@@ -74,7 +75,7 @@ auto AnalyseFunctions(const std::vector<std::string> &files,
  */
 auto SplitByClasses(const auto &analysis) {
     // здесь ваш код
-    return std::vector<std::pair<analyzer::function::Function, analyzer::metric::MetricResult>>{};
+    return std::vector<FunctionsAnalyseResult>{};
 }
 
 /**
@@ -87,7 +88,7 @@ auto SplitByClasses(const auto &analysis) {
  */
 auto SplitByFiles(const auto &analysis) {
     // здесь ваш код
-    return std::vector<std::pair<analyzer::function::Function, analyzer::metric::MetricResult>>{};
+    return std::vector<FunctionsAnalyseResult>{};
 }
 
 /**
@@ -100,7 +101,9 @@ auto SplitByFiles(const auto &analysis) {
  */
 void AccumulateFunctionAnalysis(const auto &analysis,
                                 const analyzer::metric_accumulator::MetricsAccumulator &accumulator) {
-    // здесь ваш код
+     rs::for_each(analysis,
+                 [&](const auto &result_pair) { accumulator.AccumulateNextFunctionResults(result_pair.second); });
+    //
 }
 
 }  // namespace analyzer
