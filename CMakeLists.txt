@@ -33,5 +33,11 @@ target_include_directories(${target}
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
+add_custom_command(TARGET analyzer POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/files"
+        "$<TARGET_FILE_DIR:analyzer>/files"
+)
+
 include(CTest)
 enable_testing()

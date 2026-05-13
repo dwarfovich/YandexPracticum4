@@ -1,4 +1,4 @@
-//#include <unistd.h>
+// #include <unistd.h>
 
 #include <algorithm>
 #include <array>
@@ -40,12 +40,22 @@ namespace rs = std::ranges;
  */
 auto AnalyseFunctions(const std::vector<std::string> &files,
                       const analyzer::metric::MetricExtractor &metric_extractor) {
-    // здесь ваш код
-    return std::vector<std::pair<analyzer::function::Function, analyzer::metric::MetricResult>>{};
+    std::vector<std::pair<analyzer::function::Function, analyzer::metric::MetricResults>> result;
+    result.reserve(files.size());
+    rs::for_each(files, [&](const auto &file_path) {
+        analyzer::file::File file{file_path};
+        analyzer::function::FunctionExtractor function_extractor;
+        auto functions = function_extractor.Get(file);
+        rs::for_each(functions, [&](auto &&function) {
+            auto metric_results = metric_extractor.Get(function);
+            result.emplace_back(std::move(function), std::move(metric_results));
+        });
+    });
+    return result;
 }
 
 /**
- * 
+ *
  * @brief Группирует результаты анализа по классам.
  *
  * Эта функция:
