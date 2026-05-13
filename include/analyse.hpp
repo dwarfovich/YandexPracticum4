@@ -1,4 +1,4 @@
-#include <unistd.h>
+//#include <unistd.h>
 
 #include <algorithm>
 #include <array>
@@ -41,6 +41,7 @@ namespace rs = std::ranges;
 auto AnalyseFunctions(const std::vector<std::string> &files,
                       const analyzer::metric::MetricExtractor &metric_extractor) {
     // здесь ваш код
+    return std::vector<std::pair<analyzer::function::Function, analyzer::metric::MetricResult>>{};
 }
 
 /**
@@ -63,6 +64,7 @@ auto AnalyseFunctions(const std::vector<std::string> &files,
  */
 auto SplitByClasses(const auto &analysis) {
     // здесь ваш код
+    return std::vector<std::pair<analyzer::function::Function, analyzer::metric::MetricResult>>{};
 }
 
 /**
@@ -75,6 +77,7 @@ auto SplitByClasses(const auto &analysis) {
  */
 auto SplitByFiles(const auto &analysis) {
     // здесь ваш код
+    return std::vector<std::pair<analyzer::function::Function, analyzer::metric::MetricResult>>{};
 }
 
 /**

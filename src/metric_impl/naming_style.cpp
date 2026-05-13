@@ -1,6 +1,5 @@
 #include "metric_impl/naming_style.hpp"
-
-#include <unistd.h>
+//#include <unistd.h>
 
 #include <algorithm>
 #include <array>
@@ -18,6 +17,7 @@
 #include <vector>
 
 namespace analyzer::metric::metric_impl {
+
 std::string NamingStyleMetric::Name() const { return kName; }
 
 MetricResult::ValueType NamingStyleMetric::CalculateImpl(const function::Function &f) const {

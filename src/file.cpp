@@ -37,31 +37,31 @@ std::string File::GetAst(const std::string &filename) try {
     std::string result;
     std::array<char, 256> buffer;
 
-    using PipePtr = std::unique_ptr<FILE, decltype([](FILE *pipe) {
-                                        if (!pipe)
-                                            return;
+    //using PipePtr = std::unique_ptr<FILE, decltype([](FILE *pipe) {
+    //                                    if (!pipe)
+    //                                        return;
 
-                                        int status = pclose(pipe);
-                                        if (WIFEXITED(status)) {
-                                            int exit_status = WEXITSTATUS(status);
-                                            if (exit_status != 0) {
-                                                throw std::runtime_error("Command failed with exit code " +
-                                                                         std::to_string(exit_status));
-                                            }
-                                        } else {
-                                            throw std::runtime_error("Command terminated abnormally");
-                                        }
-                                    })>;
+    //                                    int status = pclose(pipe);
+    //                                    if (WIFEXITED(status)) {
+    //                                        int exit_status = WEXITSTATUS(status);
+    //                                        if (exit_status != 0) {
+    //                                            throw std::runtime_error("Command failed with exit code " +
+    //                                                                     std::to_string(exit_status));
+    //                                        }
+    //                                    } else {
+    //                                        throw std::runtime_error("Command terminated abnormally");
+    //                                    }
+    //                                })>;
 
-    FILE *raw_pipe = popen(full_cmd.c_str(), "r");
-    if (!raw_pipe) {
-        throw std::runtime_error("Failed to execute command: " + std::string(std::strerror(errno)));
-    }
-    PipePtr pipe(raw_pipe);
+    //FILE *raw_pipe = popen(full_cmd.c_str(), "r");
+    //if (!raw_pipe) {
+    //    throw std::runtime_error("Failed to execute command: " + std::string(std::strerror(errno)));
+    //}
+    //PipePtr pipe(raw_pipe);
 
-    while (fgets(buffer.data(), buffer.size(), pipe.get())) {
-        result += buffer.data();
-    }
+    //while (fgets(buffer.data(), buffer.size(), pipe.get())) {
+    //    result += buffer.data();
+    //}
 
     return result;
 } catch (const std::exception &e) {

@@ -1,6 +1,6 @@
 #include "metric_impl/cyclomatic_complexity.hpp"
 
-#include <unistd.h>
+// #include <unistd.h>
 
 #include <algorithm>
 #include <array>
@@ -17,7 +17,9 @@
 #include <vector>
 
 namespace analyzer::metric::metric_impl {
+
 std::string CyclomaticComplexityMetric::Name() const { return kName; }
+
 MetricResult::ValueType CyclomaticComplexityMetric::CalculateImpl(const function::Function &f) const {
     // Получаем строковое представление AST (абстрактного синтаксического дерева) функции.
     // Это S-выражение, сгенерированное утилитой tree-sitter, например:
@@ -64,6 +66,6 @@ MetricResult::ValueType CyclomaticComplexityMetric::CalculateImpl(const function
     // сколько раз он встречается в `function_ast`, используя `std::string::find`
     // в цикле (это допустимо, так как вы работаете со строковым представлением AST,
     // а не с исходным кодом напрямую).
-
+    return {};
 }
 }  // namespace analyzer::metric::metric_impl

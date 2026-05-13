@@ -1,6 +1,6 @@
 #include "metric_accumulator_impl/categorical_accumulator.hpp"
 
-#include <unistd.h>
+// #include <unistd.h>
 
 #include <algorithm>
 #include <array>
