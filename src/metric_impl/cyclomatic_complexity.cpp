@@ -66,6 +66,11 @@ MetricResult::ValueType CyclomaticComplexityMetric::CalculateImpl(const function
     // сколько раз он встречается в `function_ast`, используя `std::string::find`
     // в цикле (это допустимо, так как вы работаете со строковым представлением AST,
     // а не с исходным кодом напрямую).
-    return {};
+    int complexity = 1;
+    std::ranges::for_each(complexity_nodes, [&complexity, &function_ast](auto node) {
+        auto windows = function_ast | std::views::slide(node.size());
+        complexity += std::ranges::count_if(windows, [&](const auto &w) { return std::ranges::equal(w, node); });
+    });
+    return complexity;
 }
 }  // namespace analyzer::metric::metric_impl
