@@ -39,7 +39,7 @@ namespace rs = std::ranges;
  */
 using FunctionsAnalyseResult = std::vector<std::pair<analyzer::function::Function, analyzer::metric::MetricResults>>;
 
-auto AnalyseFunctions(const std::vector<std::string> &files,
+inline auto AnalyseFunctions(const std::vector<std::string> &files,
                       const analyzer::metric::MetricExtractor &metric_extractor) {
     FunctionsAnalyseResult result;
     result.reserve(files.size());

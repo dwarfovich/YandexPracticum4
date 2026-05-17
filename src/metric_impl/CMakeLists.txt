@@ -1,7 +1,3 @@
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
 set(target metric_test)
 
 add_executable(${target}
@@ -9,8 +5,6 @@ add_executable(${target}
     tests/cyclomatic_complexity.cpp
     tests/parameters_count.cpp
     tests/files_test_data.cpp)
-
-target_compile_features(${target} PRIVATE cxx_std_23)
 
 target_link_libraries(${target}
     PRIVATE
