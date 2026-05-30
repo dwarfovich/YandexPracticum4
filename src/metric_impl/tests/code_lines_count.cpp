@@ -22,7 +22,7 @@ TEST_P(LinesCountTest, CountsProperly) {
 
     const auto &analysis = FilesTests::FunctionsAnalysisForFile(std::get<0>(parameters));
     const metric::MetricResults &results = FindMetricResultsForFunction(analysis, std::get<1>(parameters));
-    auto metric_iter = std::ranges::find(results, "Code lines count" , &metric::MetricResult::metric_name);
+    auto metric_iter = std::ranges::find(results, "Code lines count", &metric::MetricResult::metric_name);
     ASSERT_TRUE(metric_iter != results.cend());
     EXPECT_EQ(std::get<int>(metric_iter->value), std::get<2>(parameters));
 }
@@ -40,5 +40,7 @@ INSTANTIATE_TEST_SUITE_P(FilesTests, LinesCountTest,
                                            std::make_tuple("nested_if.py", "Testnestedif", 8),
                                            std::make_tuple("simple.py", "test_simple", 5),
                                            std::make_tuple("ternary.py", "teSt_ternary", 1)));
+
+
 
 }  // namespace analyzer::metric::metric_impl

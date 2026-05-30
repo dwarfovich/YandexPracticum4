@@ -66,7 +66,7 @@ MetricResult::ValueType CodeLinesCountMetric::CalculateImpl(const function::Func
     // а тело функции начинается со следующей строки (обычно с отступа).
     // std::views::filter([&](int line) { return is_code_line(line); })));
 
-    auto lines_view = std::views::iota(start_line  + 1, end_line + 1) | std::views::filter([&](int i) { return is_code_line(i); });
+    auto lines_view = std::views::iota(start_line + 1, end_line + 1) | std::views::filter([&](int i) { return is_code_line(i); });
     const auto count = std::ranges::distance(lines_view);
 
     return static_cast<int>(count);

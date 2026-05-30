@@ -49,5 +49,5 @@ target_include_directories(cmd_options
 
 
 # Настраиваем библиотеки metric_accumulator_impl и metric_impl
-add_subdirectory(metric_accumulator_impl)
 add_subdirectory(metric_impl)
+add_subdirectory(metric_accumulator_impl)

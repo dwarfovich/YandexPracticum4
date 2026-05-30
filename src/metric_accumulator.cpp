@@ -33,10 +33,9 @@ namespace analyzer::metric_accumulator {
 void MetricsAccumulator::AccumulateNextFunctionResults(const std::vector<metric::MetricResult> &metric_results) const {
     std::ranges::for_each(metric_results, [this](const auto &result) {
         auto iter = accumulators.find(result.metric_name);
-        if (iter == accumulators.cend()) {
-            throw std::runtime_error("Unknown metric name: " + result.metric_name);
+        if (iter != accumulators.cend()) {
+            iter->second->Accumulate(result);
         }
-        iter->second->Accumulate(result);
     });
 }
 /**

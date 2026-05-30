@@ -21,8 +21,8 @@ add_executable(${target} main.cpp)
 
 target_link_libraries(${target} 
     PRIVATE
-        metric_accumulator
         metric
+        metric_accumulator
         cmd_options
         #range-v3::range-v3
 )
