@@ -40,18 +40,25 @@ namespace rs = std::ranges;
 using FunctionsAnalyseResult = std::vector<std::pair<analyzer::function::Function, analyzer::metric::MetricResults>>;
 
 inline auto AnalyseFunctions(const std::vector<std::string> &files,
-                      const analyzer::metric::MetricExtractor &metric_extractor) {
+                             const analyzer::metric::MetricExtractor &metric_extractor) {
     FunctionsAnalyseResult result;
-    result.reserve(files.size());
-    rs::for_each(files, [&](const auto &file_path) {
-        analyzer::file::File file{file_path};
-        analyzer::function::FunctionExtractor function_extractor;
-        auto functions = function_extractor.Get(file);
-        rs::for_each(functions, [&](auto &&function) {
-            auto metric_results = metric_extractor.Get(function);
-            result.emplace_back(std::move(function), std::move(metric_results));
-        });
-    });
+    // clang-format off
+    using namespace analyzer::file;
+    using namespace analyzer::function;
+    std::ranges::for_each(files
+                         | rv::transform([](const auto &file_path) {
+                              File file{file_path};
+                              FunctionExtractor extractor;
+                              return extractor.Get(file);
+                          })
+                         | rv::join
+                         | rv::transform([&metric_extractor](Function function) {
+                                  auto metrics = metric_extractor.Get(function);
+                                  return std::pair{std::move(function), std::move(metrics)};
+                              }),
+                         [&](auto &&item) { result.emplace_back(std::move(item)); }
+    );
+    // clang-format on
     return result;
 }
 
@@ -75,15 +82,12 @@ inline auto AnalyseFunctions(const std::vector<std::string> &files,
  */
 auto SplitByClasses(const auto &analysis) {
     using namespace std::ranges;
-    auto methods_results = analysis | std::views::filter([](const auto &p) { return p.first.class_name.has_value(); }) |
-                           to<FunctionsAnalyseResult>();
+    auto methods_results = analysis | std::views::filter([](const auto &p) { return p.first.class_name.has_value(); });
 
     std::ranges::sort(methods_results, {}, [](const auto &p) { return p.first.class_name.value(); });
-    auto result =
-        methods_results |
-        views::chunk_by([](const auto &lhs, const auto &rhs) { return lhs.first.class_name == rhs.first.class_name; }) |
-        views::transform([](auto &&group) { return FunctionsAnalyseResult(group.begin(), group.end()); }) |
-        to<std::vector<FunctionsAnalyseResult>>();
+    auto result = methods_results | views::chunk_by([](const auto &lhs, const auto &rhs) {
+                      return lhs.first.class_name == rhs.first.class_name;
+                  });
 
     return result;
 }
@@ -103,9 +107,8 @@ auto SplitByFiles(auto analysis) {
                        return lhs.first.filename == rhs.first.filename;
                    });
 
-    auto result = chunked |
-                  views::transform([](auto &&group) { return FunctionsAnalyseResult(group.begin(), group.end()); }) |
-                  to<std::vector<FunctionsAnalyseResult>>();
+    auto result =
+        chunked | views::transform([](auto &&group) { return FunctionsAnalyseResult(group.begin(), group.end()); });
 
     return result;
 }

@@ -5,16 +5,6 @@
 
 namespace analyzer::metric::metric_impl {
 
-const metric::MetricResults &FindMetricResultsForFunction(const FunctionsAnalyseResult &analysis,
-                                                          const std::string &function) {
-    auto iter = std::ranges::find_if(analysis, [&](const auto &result) { return result.first.name == function; });
-    if (iter != analysis.cend()) {
-        return iter->second;
-    } else {
-        throw std::runtime_error("Couldn't find analysis for function " + function);
-    }
-}
-
 class LinesCountTest : public ::testing::TestWithParam<std::tuple<std::string, std::string, int>> {};
 
 TEST_P(LinesCountTest, CountsProperly) {

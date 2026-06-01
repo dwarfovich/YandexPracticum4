@@ -7,43 +7,32 @@
 
 namespace analyzer::metric_accumulator::metric_accumulator_impl::test {
 
-    TEST_F(FilesTests, Initialization) {}
+TEST_F(FilesTests, Initialization) {}
 
-     const metric::MetricResults &FindMetricResultsForFunction(const FunctionsAnalyseResult &analysis,
-                                                          const std::string &function) {
-    auto iter = std::ranges::find_if(analysis, [&](const auto &result) { return result.first.name == function; });
-    if (iter != analysis.cend()) {
-        return iter->second;
-    } else {
-        throw std::runtime_error("Couldn't find analysis for function " + function);
-    }
-}
-
-void AccumulateFilesAnalysis(const std::vector<std::string> &files, MetricsAccumulator& accumulator){
-    rs::for_each(files, [&](const auto &file) { 
+void AccumulateFilesAnalysis(const std::vector<std::string> &files, MetricsAccumulator &accumulator) {
+    rs::for_each(files, [&](const auto &file) {
         const auto &analysis = FilesTests::FunctionsAnalysisForFile(file);
         AccumulateFunctionAnalysis(analysis, accumulator);
     });
 }
 
-TEST(AverageAccumulatorTests, Empty) { 
-        analyzer::metric_accumulator::MetricsAccumulator accumulator;
-     using namespace analyzer::metric_accumulator::metric_accumulator_impl;
-     using namespace analyzer::metric::metric_impl;
-     accumulator.RegisterAccumulator(CodeLinesCountMetric::kName, std::make_unique<AverageAccumulator>());
-     analyzer::AccumulateFunctionAnalysis(FunctionsAnalyseResult{}, accumulator);
-     const auto &f_acc = accumulator.GetFinalizedAccumulator<AverageAccumulator>(CodeLinesCountMetric::kName);
-     const auto r = f_acc.Get();
-     ASSERT_DOUBLE_EQ(r, 0.);
+TEST(AverageAccumulatorTests, Empty) {
+    analyzer::metric_accumulator::MetricsAccumulator accumulator;
+    using namespace analyzer::metric_accumulator::metric_accumulator_impl;
+    using namespace analyzer::metric::metric_impl;
+    accumulator.RegisterAccumulator(CodeLinesCountMetric::kName, std::make_unique<AverageAccumulator>());
+    analyzer::AccumulateFunctionAnalysis(FunctionsAnalyseResult{}, accumulator);
+    const auto &f_acc = accumulator.GetFinalizedAccumulator<AverageAccumulator>(CodeLinesCountMetric::kName);
+    const auto r = f_acc.Get();
+    ASSERT_DOUBLE_EQ(r, 0.);
 }
-
 
 TEST(AverageAccumulatorTests, SingleFile) {
     MetricsAccumulator accumulator;
     using namespace analyzer::metric_accumulator::metric_accumulator_impl;
     using namespace analyzer::metric::metric_impl;
     accumulator.RegisterAccumulator(CodeLinesCountMetric::kName, std::make_unique<AverageAccumulator>());
-    
+
     AccumulateFilesAnalysis({"comments.py"}, accumulator);
 
     const auto &f_acc = accumulator.GetFinalizedAccumulator<AverageAccumulator>(CodeLinesCountMetric::kName);
@@ -74,7 +63,7 @@ TEST(AverageAccumulatorTests, MultipleFiles2) {
 
     const auto &f_acc = accumulator.GetFinalizedAccumulator<AverageAccumulator>(CodeLinesCountMetric::kName);
     const auto r = f_acc.Get();
-    ASSERT_DOUBLE_EQ(r, 11./3);
+    ASSERT_DOUBLE_EQ(r, 11. / 3);
 }
 
 TEST(AverageAccumulatorTests, MultipleFiles3) {

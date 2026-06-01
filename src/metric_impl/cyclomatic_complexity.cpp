@@ -67,10 +67,12 @@ MetricResult::ValueType CyclomaticComplexityMetric::CalculateImpl(const function
     // в цикле (это допустимо, так как вы работаете со строковым представлением AST,
     // а не с исходным кодом напрямую).
     int complexity = 1;
-    std::ranges::for_each(complexity_nodes, [&complexity, &function_ast](auto node) {
+    std::ranges::for_each(complexity_nodes, [&complexity, &function_ast](std::string_view node) {
         auto windows = function_ast | std::views::slide(node.size());
-        complexity += std::ranges::count_if(windows, [&](const auto &w) { return std::ranges::equal(w, node); });
+        complexity += std::ranges::count_if(
+            windows, [node](const auto &w) { return std::string_view(w.data(), w.size()) == node; });
     });
     return complexity;
 }
+
 }  // namespace analyzer::metric::metric_impl

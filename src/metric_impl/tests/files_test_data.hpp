@@ -15,11 +15,21 @@
 #include <ranges>
 #include <string>
 
+inline const analyzer::metric::MetricResults &
+FindMetricResultsForFunction(const analyzer::FunctionsAnalyseResult &analysis, const std::string &function) {
+    auto iter = std::ranges::find_if(analysis, [&](const auto &result) { return result.first.name == function; });
+    if (iter != analysis.cend()) {
+        return iter->second;
+    } else {
+        throw std::runtime_error("Couldn't find analysis for function " + function);
+    }
+}
+
 class FilesTests : public ::testing::Test {
 public:
-    static const analyzer::FunctionsAnalyseResult& FunctionsAnalysisForFile(const std::string &file) {
+    static const analyzer::FunctionsAnalyseResult &FunctionsAnalysisForFile(const std::string &file) {
         auto iter = functions_analysis.find(file);
-        if (iter != functions_analysis.cend()){
+        if (iter != functions_analysis.cend()) {
             return iter->second;
         } else {
             throw std::runtime_error("Unknown file: " + file);
@@ -28,8 +38,9 @@ public:
 
 public:
     inline static std::unordered_map<std::string, analyzer::FunctionsAnalyseResult> functions_analysis;
-    inline static auto filenames = std::to_array({"comments.py", "exceptions.py", "if.py", "loops.py", "many_lines.py", "many_parameters.py",
-        "match_case.py", "nested_if.py", "simple.py", "ternary.py"});
+    inline static auto filenames =
+        std::to_array({"comments.py", "exceptions.py", "if.py", "loops.py", "many_lines.py", "many_parameters.py",
+                       "match_case.py", "nested_if.py", "simple.py", "ternary.py"});
 
     static void SetUpTestSuite() {
         using namespace analyzer::metric::metric_impl;
