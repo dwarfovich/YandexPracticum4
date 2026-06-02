@@ -41,23 +41,21 @@ using FunctionsAnalyseResult = std::vector<std::pair<analyzer::function::Functio
 
 inline auto AnalyseFunctions(const std::vector<std::string> &files,
                              const analyzer::metric::MetricExtractor &metric_extractor) {
-    FunctionsAnalyseResult result;
     // clang-format off
     using namespace analyzer::file;
     using namespace analyzer::function;
-    std::ranges::for_each(files
-                         | rv::transform([](const auto &file_path) {
-                              File file{file_path};
-                              FunctionExtractor extractor;
-                              return extractor.Get(file);
-                          })
-                         | rv::join
-                         | rv::transform([&metric_extractor](Function function) {
-                                  auto metrics = metric_extractor.Get(function);
-                                  return std::pair{std::move(function), std::move(metrics)};
-                              }),
-                         [&](auto &&item) { result.emplace_back(std::move(item)); }
-    );
+    auto result = files
+                  | rv::transform([](const auto &file_path) {
+                        File file{file_path};
+                        FunctionExtractor extractor;
+                        return extractor.Get(file);
+                    })
+                  | rv::join
+                  | rv::transform([&metric_extractor](Function function) {
+                        auto metrics = metric_extractor.Get(function);
+                        return std::pair{std::move(function), std::move(metrics)};
+                    })
+                  | std::ranges::to<FunctionsAnalyseResult>();
     // clang-format on
     return result;
 }
@@ -81,14 +79,19 @@ inline auto AnalyseFunctions(const std::vector<std::string> &files,
  * действительно исчезают из результата.
  */
 auto SplitByClasses(const auto &analysis) {
+    // clang-format off
     using namespace std::ranges;
-    auto methods_results = analysis | std::views::filter([](const auto &p) { return p.first.class_name.has_value(); });
+    auto methods_results = analysis
+                           | std::views::filter([](const auto &p) { return p.first.class_name.has_value(); })
+                           | to<FunctionsAnalyseResult>();
 
     std::ranges::sort(methods_results, {}, [](const auto &p) { return p.first.class_name.value(); });
-    auto result = methods_results | views::chunk_by([](const auto &lhs, const auto &rhs) {
-                      return lhs.first.class_name == rhs.first.class_name;
-                  });
-
+    auto result =
+        methods_results
+        | views::chunk_by([](const auto &lhs, const auto &rhs) { return lhs.first.class_name == rhs.first.class_name; })
+        | views::transform([](auto &&group) { return FunctionsAnalyseResult(group.begin(), group.end()); })
+        | to<std::vector<FunctionsAnalyseResult>>();
+    // clang-format on
     return result;
 }
 
@@ -101,14 +104,17 @@ auto SplitByClasses(const auto &analysis) {
  * - Использует `chunk_by`, поэтому **порядок функций в `analysis` должен быть по файлам**.
  */
 auto SplitByFiles(auto analysis) {
+    // clang-format off
     using namespace std::ranges;
     sort(analysis, {}, [](const auto &p) { return p.first.filename; });
     auto chunked = analysis | views::chunk_by([](const auto &lhs, const auto &rhs) {
-                       return lhs.first.filename == rhs.first.filename;
-                   });
+                                  return lhs.first.filename == rhs.first.filename;
+                              });
 
-    auto result =
-        chunked | views::transform([](auto &&group) { return FunctionsAnalyseResult(group.begin(), group.end()); });
+    auto result = chunked
+                  | views::transform([](auto &&group) { return FunctionsAnalyseResult(group.begin(), group.end()); })
+                  | to<std::vector<FunctionsAnalyseResult>>();
+    // clang-format on
 
     return result;
 }

@@ -43,8 +43,7 @@ std::string File::GetAst(const std::string &filename) try {
     std::string result;
     std::array<char, 256> buffer;
 
-    char *path = std::getenv("PATH");
-
+#ifdef _WIN32
     HANDLE read_pipe = nullptr;
     HANDLE write_pipe = nullptr;
 
@@ -65,7 +64,7 @@ std::string File::GetAst(const std::string &filename) try {
     si.hStdError = write_pipe;
 
     PROCESS_INFORMATION pi{};
-    
+
     if (!CreateProcess(nullptr, full_cmd.data(), nullptr, nullptr, TRUE, 0, nullptr, nullptr, &si, &pi)) {
         CloseHandle(read_pipe);
         CloseHandle(write_pipe);
@@ -93,33 +92,33 @@ std::string File::GetAst(const std::string &filename) try {
     if (exit_code != 0) {
         throw std::runtime_error("Process failed with code " + std::to_string(exit_code));
     }
+#else
+    using PipePtr = std::unique_ptr<FILE, decltype([](FILE *pipe) {
+                                        if (!pipe)
+                                            return;
 
-    //using PipePtr = std::unique_ptr<FILE, decltype([](FILE *pipe) {
-    //                                    if (!pipe)
-    //                                        return;
+                                        int status = pclose(pipe);
+                                        if (WIFEXITED(status)) {
+                                            int exit_status = WEXITSTATUS(status);
+                                            if (exit_status != 0) {
+                                                throw std::runtime_error("Command failed with exit code " +
+                                                                         std::to_string(exit_status));
+                                            }
+                                        } else {
+                                            throw std::runtime_error("Command terminated abnormally");
+                                        }
+                                    })>;
 
-    //                                    int status = pclose(pipe);
-    //                                    if (WIFEXITED(status)) {
-    //                                        int exit_status = WEXITSTATUS(status);
-    //                                        if (exit_status != 0) {
-    //                                            throw std::runtime_error("Command failed with exit code " +
-    //                                                                     std::to_string(exit_status));
-    //                                        }
-    //                                    } else {
-    //                                        throw std::runtime_error("Command terminated abnormally");
-    //                                    }
-    //                                })>;
+    FILE *raw_pipe = popen(full_cmd.c_str(), "r");
+    if (!raw_pipe) {
+        throw std::runtime_error("Failed to execute command: " + std::string(std::strerror(errno)));
+    }
+    PipePtr pipe(raw_pipe);
 
-    //FILE *raw_pipe = popen(full_cmd.c_str(), "r");
-    //if (!raw_pipe) {
-    //    throw std::runtime_error("Failed to execute command: " + std::string(std::strerror(errno)));
-    //}
-    //PipePtr pipe(raw_pipe);
-
-    //while (fgets(buffer.data(), buffer.size(), pipe.get())) {
-    //    result += buffer.data();
-    //}
-
+    while (fgets(buffer.data(), buffer.size(), pipe.get())) {
+        result += buffer.data();
+    }
+#endif
     return result;
 } catch (const std::exception &e) {
     throw std::runtime_error("Error while getting ast from " + filename);
