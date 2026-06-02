@@ -1,6 +1,6 @@
 #include "metric_accumulator_impl/sum_average_accumulator.hpp"
 
-#include <unistd.h>
+//#include <unistd.h>
 
 #include <algorithm>
 #include <array>

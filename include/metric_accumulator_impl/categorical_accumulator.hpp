@@ -1,5 +1,5 @@
 #pragma once
-#include <unistd.h>
+//#include <unistd.h>
 
 #include <algorithm>
 #include <array>
@@ -21,13 +21,17 @@
 namespace analyzer::metric_accumulator::metric_accumulator_impl {
 
 struct CategoricalAccumulator : public IAccumulator {
-    void Accumulate(const metric::MetricResult &metric_result) override;
+    void Accumulate(const metric::MetricResult &metric_result) override { 
+        using ValueType = std::variant<int, std::string>;  // если захотите реализовывать метрику
+        ++categories_freq[std::get<std::string>(metric_result.value)];
+    }
 
-    virtual void Finalize() override;
+    virtual void Finalize() override {}
 
-    virtual void Reset() override;
+    virtual void Reset() override { categories_freq.clear();
+    }
 
-    const std::unordered_map<std::string, int> &Get() const;
+    const std::unordered_map<std::string, int> &Get() const { return categories_freq; }
 
 private:
     std::unordered_map<std::string, int> categories_freq;

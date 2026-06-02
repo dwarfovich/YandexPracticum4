@@ -1,6 +1,6 @@
 #include "metric.hpp"
 
-#include <unistd.h>
+// #include <unistd.h>
 
 #include <algorithm>
 #include <any>
@@ -21,6 +21,7 @@
 #include "function.hpp"
 
 namespace analyzer::metric {
+
 void MetricExtractor::RegisterMetric(std::unique_ptr<IMetric> metric) { metrics.push_back(std::move(metric)); }
 
 /**
@@ -30,8 +31,13 @@ void MetricExtractor::RegisterMetric(std::unique_ptr<IMetric> metric) { metrics.
  * к переданной функции `func` и собирает результаты в вектор.
  */
 MetricResults MetricExtractor::Get(const function::Function &func) const {
-    // здесь ваш код
-    return {};
+    MetricResults results;
+    results.reserve(metrics.size());
+
+    using std::ranges::transform;
+    transform(metrics, std::back_inserter(results), [&](const auto &metric) { return metric->Calculate(func); });
+
+    return results;
 }
 
 }  // namespace analyzer::metric

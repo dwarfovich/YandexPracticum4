@@ -12,6 +12,7 @@ add_library(metric
     metric.cpp
     metric_impl/code_lines_count.cpp
     metric_impl/cyclomatic_complexity.cpp
+    metric_impl/naming_style.cpp
     metric_impl/parameters_count.cpp
 )
 
@@ -48,5 +49,5 @@ target_include_directories(cmd_options
 
 
 # Настраиваем библиотеки metric_accumulator_impl и metric_impl
-add_subdirectory(metric_accumulator_impl)
 add_subdirectory(metric_impl)
+add_subdirectory(metric_accumulator_impl)

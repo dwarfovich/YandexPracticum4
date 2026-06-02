@@ -1,4 +1,8 @@
-#include <unistd.h>
+// #include <unistd.h>
+#include "file.hpp"
+#include "function.hpp"
+#include "metric.hpp"
+#include "metric_accumulator.hpp"
 
 #include <algorithm>
 #include <array>
@@ -17,11 +21,6 @@
 #include <variant>
 #include <vector>
 
-#include "file.hpp"
-#include "function.hpp"
-#include "metric.hpp"
-#include "metric_accumulator.hpp"
-
 namespace analyzer {
 
 namespace rv = std::ranges::views;
@@ -38,13 +37,31 @@ namespace rs = std::ranges;
  * 5. Для каждой функции вычисляет набор метрик через переданный `metric_extractor`.
  * 6. Возвращает вектор пар: (функция, результаты её метрик).
  */
-auto AnalyseFunctions(const std::vector<std::string> &files,
-                      const analyzer::metric::MetricExtractor &metric_extractor) {
-    // здесь ваш код
+using FunctionsAnalyseResult = std::vector<std::pair<analyzer::function::Function, analyzer::metric::MetricResults>>;
+
+inline auto AnalyseFunctions(const std::vector<std::string> &files,
+                             const analyzer::metric::MetricExtractor &metric_extractor) {
+    // clang-format off
+    using namespace analyzer::file;
+    using namespace analyzer::function;
+    auto result = files
+                  | rv::transform([](const auto &file_path) {
+                        File file{file_path};
+                        FunctionExtractor extractor;
+                        return extractor.Get(file);
+                    })
+                  | rv::join
+                  | rv::transform([&metric_extractor](Function function) {
+                        auto metrics = metric_extractor.Get(function);
+                        return std::pair{std::move(function), std::move(metrics)};
+                    })
+                  | std::ranges::to<FunctionsAnalyseResult>();
+    // clang-format on
+    return result;
 }
 
 /**
- * 
+ *
  * @brief Группирует результаты анализа по классам.
  *
  * Эта функция:
@@ -62,7 +79,20 @@ auto AnalyseFunctions(const std::vector<std::string> &files,
  * действительно исчезают из результата.
  */
 auto SplitByClasses(const auto &analysis) {
-    // здесь ваш код
+    // clang-format off
+    using namespace std::ranges;
+    auto methods_results = analysis
+                           | std::views::filter([](const auto &p) { return p.first.class_name.has_value(); })
+                           | to<FunctionsAnalyseResult>();
+
+    std::ranges::sort(methods_results, {}, [](const auto &p) { return p.first.class_name.value(); });
+    auto result =
+        methods_results
+        | views::chunk_by([](const auto &lhs, const auto &rhs) { return lhs.first.class_name == rhs.first.class_name; })
+        | views::transform([](auto &&group) { return FunctionsAnalyseResult(group.begin(), group.end()); })
+        | to<std::vector<FunctionsAnalyseResult>>();
+    // clang-format on
+    return result;
 }
 
 /**
@@ -73,8 +103,20 @@ auto SplitByClasses(const auto &analysis) {
  *   только функции из одного и того же файла (`filename`).
  * - Использует `chunk_by`, поэтому **порядок функций в `analysis` должен быть по файлам**.
  */
-auto SplitByFiles(const auto &analysis) {
-    // здесь ваш код
+auto SplitByFiles(auto analysis) {
+    // clang-format off
+    using namespace std::ranges;
+    sort(analysis, {}, [](const auto &p) { return p.first.filename; });
+    auto chunked = analysis | views::chunk_by([](const auto &lhs, const auto &rhs) {
+                                  return lhs.first.filename == rhs.first.filename;
+                              });
+
+    auto result = chunked
+                  | views::transform([](auto &&group) { return FunctionsAnalyseResult(group.begin(), group.end()); })
+                  | to<std::vector<FunctionsAnalyseResult>>();
+    // clang-format on
+
+    return result;
 }
 
 /**
@@ -87,7 +129,8 @@ auto SplitByFiles(const auto &analysis) {
  */
 void AccumulateFunctionAnalysis(const auto &analysis,
                                 const analyzer::metric_accumulator::MetricsAccumulator &accumulator) {
-    // здесь ваш код
+    rs::for_each(analysis,
+                 [&](const auto &result_pair) { accumulator.AccumulateNextFunctionResults(result_pair.second); });
 }
 
 }  // namespace analyzer

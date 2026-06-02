@@ -1,6 +1,6 @@
 #include "metric_accumulator_impl/average_accumulator.hpp"
 
-#include <unistd.h>
+// #include <unistd.h>
 
 #include <algorithm>
 #include <array>
@@ -24,7 +24,9 @@ void AverageAccumulator::Accumulate(const metric::MetricResult &metric_result) {
     count++;
 }
 void AverageAccumulator::Finalize() {
-    average = static_cast<double>(sum) / count;
+    if (count != 0) {
+        average = static_cast<double>(sum) / count;
+    }
     is_finalized = true;
 }
 

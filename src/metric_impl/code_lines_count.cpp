@@ -1,6 +1,7 @@
 #include "metric_impl/code_lines_count.hpp"
 
-#include <unistd.h>
+// #include <unistd.h>
+#include "utils.hpp"
 
 #include <algorithm>
 #include <array>
@@ -21,7 +22,7 @@ namespace analyzer::metric::metric_impl {
 std::string CodeLinesCountMetric::Name() const { return kName; }
 
 MetricResult::ValueType CodeLinesCountMetric::CalculateImpl(const function::Function &f) const {
-    auto &function_ast = f.ast;
+    auto& function_ast = f.ast;
 
     // Вспомогательная лямбда для извлечения номера строки из диапазона узла AST.
     // Формат узла в S-выражении: (node_type [start_line,start_column] [end_line,end_column] ...)
@@ -36,7 +37,7 @@ MetricResult::ValueType CodeLinesCountMetric::CalculateImpl(const function::Func
     // - конечная строка ищется по шаблону "] -"
     const int start_line = line_number(0);
     const int end_line = line_number(function_ast.find("] -"));
-    
+
     // Лямбда, проверяющая, является ли конкретная строка "кодовой", то есть не комментарием.
     auto is_code_line = [&](int line) {
         std::string line_marker = "[" + std::to_string(line) + ",";
@@ -53,7 +54,7 @@ MetricResult::ValueType CodeLinesCountMetric::CalculateImpl(const function::Func
             std::string_view(function_ast)
                 .substr(node_start + 1, function_ast.find_first_of(" \n[", node_start + 1) - node_start - 1);
 
-        return node_type != "comment";
+        return node_type != "comment" && node_type != "string";
     };
     // === ВАШ КОД ДОЛЖЕН БЫТЬ ЗДЕСЬ ===
     //
@@ -62,7 +63,13 @@ MetricResult::ValueType CodeLinesCountMetric::CalculateImpl(const function::Func
     //
     // Почему start_line + 1?
     // Потому что первая строка — это строка с объявлением функции (def ...),
-    // а тело функции начинается со следующей строки (обычно с отступа).                                             std::views::filter([&](int line) { return is_code_line(line); })));
+    // а тело функции начинается со следующей строки (обычно с отступа).
+    // std::views::filter([&](int line) { return is_code_line(line); })));
+
+    auto lines_view = std::views::iota(start_line + 1, end_line + 1) | std::views::filter([&](int i) { return is_code_line(i); });
+    const auto count = std::ranges::distance(lines_view);
+
+    return static_cast<int>(count);
 }
 
 }  // namespace analyzer::metric::metric_impl

@@ -21,8 +21,8 @@ add_executable(${target} main.cpp)
 
 target_link_libraries(${target} 
     PRIVATE
-        metric_accumulator
         metric
+        metric_accumulator
         cmd_options
         #range-v3::range-v3
 )
@@ -31,6 +31,12 @@ target_link_libraries(${target}
 target_include_directories(${target}
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
+
+add_custom_command(TARGET analyzer POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/files"
+        "$<TARGET_FILE_DIR:analyzer>/files"
 )
 
 include(CTest)

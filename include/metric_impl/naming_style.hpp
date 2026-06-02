@@ -1,5 +1,5 @@
 #pragma once
-#include <unistd.h>
+// #include <unistd.h>
 
 #include <algorithm>
 #include <array>
@@ -26,7 +26,7 @@ struct NamingStyleMetric : IMetric {
 protected:
     std::string Name() const override;
 
-    MetricResult::ValueType CalculateImpl(const function::Function& f) const override;
-};};
+    MetricResult::ValueType CalculateImpl(const function::Function &f) const override;
+};
 
 }  // namespace analyzer::metric::metric_impl

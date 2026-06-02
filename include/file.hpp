@@ -10,9 +10,15 @@
 namespace analyzer::file {
 
 struct File {
+    File(const std::string &filename);
+
+#ifdef _WIN32
+    static inline const std::string command_prefix = "cmd.exe /C tree-sitter parse ";
+#else
     static inline const std::string command_prefix =
         "tree-sitter parse --config-path /root/.config/tree-sitter/config.json ";
-    File(const std::string &filename);
+#endif
+
     std::string name;
     std::string ast;
     std::vector<std::string> source_lines;
